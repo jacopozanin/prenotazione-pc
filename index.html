@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prenotazione Computer Scuola</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --bg: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text: #1F2937;
+            /* Colori Classi */
+            --c1: #a855f7; /* Lilla */
+            --c2: #22c55e; /* Verde */
+            --c3: #eab308; /* Giallo */
+            --c4: #3b82f6; /* Blu */
+            --c5: #ef4444; /* Rosso */
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg); color: var(--text); margin: 0; padding: 15px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        .header-top {
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+        }
+        h1 { margin: 0; color: var(--primary); font-size: 24px; }
+        
+        .install-btn {
+            background-color: #10b981; color: white; border: none; padding: 8px 15px;
+            border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .install-btn:hover { background-color: #059669; }
+
+        .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 8px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 10px 15px; border: none; background-color: #e5e7eb;
+            cursor: pointer; border-radius: 8px; font-weight: bold; font-size: 15px;
+            flex-grow: 1; text-align: center;
+        }
+        .tab-btn.active { background-color: var(--primary); color: white; }
+        
+        .section {
+            background-color: var(--card-bg); padding: 20px; border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none;
+        }
+        .section.active { display: block; }
+
+        .form-group { margin-bottom: 15px; }
+        .orari-group { display: flex; gap: 15px; }
+        .orari-group > div { flex: 1; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px;}
+        input, select {
+            width: 100%; padding: 12px; border: 1px solid #d1d5db;
+            border-radius: 6px; box-sizing: border-box; font-size: 16px;
+        }
+        
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .password-wrapper input { padding-right: 45px; }
+        .toggle-pwd-btn {
+            position: absolute; right: 10px; background: none; border: none;
+            font-size: 20px; cursor: pointer; padding: 0; margin: 0; outline: none;
+        }
+
+        button.submit-btn {
+            width: 100%; padding: 14px; background-color: var(--primary);
+            color: white; border: none; border-radius: 6px; font-size: 18px; cursor: pointer; margin-top: 10px;
+            font-weight: bold;
+        }
+        button.submit-btn:hover { background-color: #4338ca; }
+        
+        .availability-box {
+            background-color: #e0f2fe; color: #0369a1; padding: 15px;
+            border-radius: 6px; margin-bottom: 15px; text-align: center; font-weight: bold; font-size: 16px;
+        }
+
+        /* Schede Elenco */
+        .booking-card {
+            border: 1px solid #d1d5db; border-radius: 6px; padding: 15px;
+            margin-bottom: 10px; background-color: #f9fafb; display: flex;
+            justify-content: space-between; align-items: center; transition: all 0.3s;
+            border-left: 5px solid #d1d5db; /* Bordo base */
+        }
+        .booking-card.highlight { transform: scale(1.02); box-shadow: 0 0 10px rgba(79, 70, 229, 0.3); }
+        .booking-card.fixed-card { background-color: #f1f5f9; }
+        
+        .btn-group { display: flex; gap: 8px; }
+        .edit-btn { background-color: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight:bold; }
+        .delete-btn { background-color: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight:bold; }
+
+        /* Calendario */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f9fafb; padding: 10px; border-radius: 8px; flex-wrap: wrap; gap:10px; }
+        .calendar-controls { display: flex; gap: 5px; width: 100%; justify-content: space-between; }
+        .calendar-controls button { padding: 10px; background: #e5e7eb; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .day-header { background: var(--primary); color: white; text-align: center; padding: 8px 0; font-weight: bold; border-radius: 4px; font-size: 14px; }
+        .cal-cell { border: 1px solid #d1d5db; background: #fff; min-height: 100px; padding: 4px; display: flex; flex-direction: column; gap: 3px; border-radius: 4px; }
+        .cal-cell.other-month { background: #f3f4f6; opacity: 0.6; }
+        .cal-cell.today { border: 2px solid var(--primary); background: #f5f3ff; }
+        .cal-date { font-weight: bold; text-align: right; font-size: 14px; margin-bottom: 2px; color: #4b5563; }
+        
+        .clickable-event { cursor: pointer; transition: transform 0.1s, filter 0.1s; border-left: 4px solid transparent; }
+        .clickable-event:hover { transform: scale(1.03); filter: brightness(0.9); }
+        .fixed-event { cursor: not-allowed; border-left: 4px solid transparent; opacity: 0.9; }
+        
+        .book-mini { font-size: 11px; padding: 4px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;}
+        .book-full { font-size: 12px; padding: 6px; border-radius: 4px; margin-bottom: 2px; line-height: 1.3; }
+
+        /* --- CLASSI COLORI (Lilla, Verde, Giallo, Blu, Rosso) --- */
+        .cl-1 { background-color: #f3e8ff !important; color: #581c87 !important; border-left-color: var(--c1) !important; }
+        .cl-2 { background-color: #dcfce7 !important; color: #14532d !important; border-left-color: var(--c2) !important; }
+        .cl-3 { background-color: #fef9c3 !important; color: #713f12 !important; border-left-color: var(--c3) !important; }
+        .cl-4 { background-color: #dbeafe !important; color: #1e3a8a !important; border-left-color: var(--c4) !important; }
+        .cl-5 { background-color: #fee2e2 !important; color: #7f1d1d !important; border-left-color: var(--c5) !important; }
+
+        /* Finestre Modali */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-content {
+            background: white; padding: 20px; border-radius: 12px; width: 95%; max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .modal-header h3 { margin: 0; color: var(--primary); font-size: 20px;}
+        .close-modal { background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280; padding: 0; line-height: 1;}
+
+        .istruzioni-lista li { margin-bottom: 10px; line-height: 1.4; }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .header-top { justify-content: center; flex-direction: column; }
+            .section { padding: 15px; }
+            .orari-group { flex-direction: column; gap: 0; }
+            .booking-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .btn-group { width: 100%; display: flex; }
+            .edit-btn, .delete-btn { flex: 1; text-align: center; }
+            .calendar-header { flex-direction: column; text-align: center; }
+            .calendar-controls { margin-top: 10px; }
+            #calMonthYear { font-size: 16px; margin-top: 10px; }
+            .day-header { font-size: 11px; padding: 5px 0; }
+            .calendar-grid { gap: 2px; }
+            .cal-cell { min-height: 70px; padding: 2px; }
+            .cal-date { font-size: 11px; }
+            .book-mini { font-size: 9px; padding: 2px; }
+            .book-full { font-size: 10px; padding: 4px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-top">
+        <h1>💻 Prenotazione PC Scuola</h1>
+        <button class="install-btn" onclick="document.getElementById('installModal').style.display='flex'">
+            📱 Installa App
+        </button>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('prenota')">Nuova</button>
+        <button class="tab-btn" onclick="switchTab('calendarioTab')">Calendario</button>
+        <button class="tab-btn" onclick="switchTab('elencoTab')">Elenco</button>
+    </div>
+
+    <!-- 1. SEZIONE PRENOTAZIONE -->
+    <div id="prenota" class="section active">
+        <div class="availability-box" id="availabilityMessage">
+            Seleziona giorno e orari per vedere i PC disponibili.
+        </div>
+        <form id="bookingForm">
+            <div class="form-group">
+                <label for="data">Giorno:</label>
+                <input type="date" id="data" required>
+            </div>
+            <div class="form-group">
+                <label for="classe">Classe:</label>
+                <select id="classe" required>
+                    <option value="">Seleziona classe...</option>
+                    <option value="1">Classe 1ª (Lilla)</option>
+                    <option value="2">Classe 2ª (Verde)</option>
+                    <option value="3">Classe 3ª (Giallo)</option>
+                    <option value="4">Classe 4ª (Blu)</option>
+                    <option value="5">Classe 5ª (Rosso)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="insegnante">Nome Insegnante:</label>
+                <input type="text" id="insegnante" placeholder="Es. Mario Rossi" required>
+            </div>
+            <div class="orari-group">
+                <div class="form-group">
+                    <label for="oraInizio">Orario Inizio:</label>
+                    <select id="oraInizio" required>
+                        <option value="">Inizio...</option>
+                        <option value="08:30">08:30</option>
+                        <option value="09:30">09:30</option>
+                        <option value="10:30">10:30</option>
+                        <option value="11:30">11:30</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="oraFine">Orario Fine:</label>
+                    <select id="oraFine" required disabled>
+                        <option value="">Prima scegli l'inizio...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="numPc">Numero di PC necessari (Max 25):</label>
+                <input type="number" id="numPc" min="1" max="25" required>
+            </div>
+            <div class="form-group">
+                <label for="password">🔑 Password (per modificarla in futuro):</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Scegli una password" required>
+                    <button type="button" class="toggle-pwd-btn" onclick="togglePassword('password', this)" title="Mostra/Nascondi">👁️</button>
+                </div>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">Prenota Computer</button>
+        </form>
+    </div>
+
+    <!-- 2. SEZIONE CALENDARIO -->
+    <div id="calendarioTab" class="section">
+        <div class="calendar-header">
+            <select id="calView" onchange="cambiaVistaCalendario()" style="width: auto; padding: 8px; font-weight:bold; border-radius: 6px;">
+                <option value="mensile">Vista Mensile</option>
+                <option value="settimanale">Vista Settimanale</option>
+            </select>
+            <h3 id="calMonthYear" style="margin:0; color: var(--primary);"></h3>
+            <div class="calendar-controls">
+                <button onclick="navigaCalendario(-1)">⬅️ Prec</button>
+                <button onclick="vaiAOggi()">Oggi</button>
+                <button onclick="navigaCalendario(1)">Succ ➡️</button>
+            </div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <!-- 3. SEZIONE ELENCO -->
+    <div id="elencoTab" class="section">
+        <h2 style="font-size: 20px; margin-top:0;">Elenco Prenotazioni Attive</h2>
+        <div class="form-group">
+            <label for="filterDate">Filtra per giorno:</label>
+            <input type="date" id="filterDate">
+        </div>
+        <div id="bookingsList"></div>
+    </div>
+</div>
+
+<!-- MODALE ISTRUZIONI INSTALLAZIONE APP -->
+<div id="installModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📱 Installa l'App</h3>
+            <button class="close-modal" onclick="document.getElementById('installModal').style.display='none'">&times;</button>
+        </div>
+        <p style="margin-top: 0;">Aggiungi questa pagina alla tua Home per usarla come una vera App, senza dover aprire ogni volta il browser!</p>
+        
+        <h4 style="color: #ea580c; margin-bottom: 5px;">🍎 iPhone e iPad (Safari)</h4>
+        <ol class="istruzioni-lista" style="margin-top: 5px;">
+            <li>Tocca l'icona <strong>Condividi</strong> (il quadrato con la freccia verso l'alto) in basso nello schermo.</li>
+            <li>Scorri il menu e tocca <strong>Aggiungi alla schermata Home</strong>.</li>
+        </ol>
+
+        <h4 style="color: #16a34a; margin-bottom: 5px;">🤖 Android (Chrome)</h4>
+        <ol class="istruzioni-lista" style="margin-top: 5px;">
+            <li>Tocca i <strong>Tre puntini</strong> in alto a destra.</li>
+            <li>Tocca <strong>Aggiungi a schermata Home</strong> (o Installa App).</li>
+        </ol>
+    </div>
+</div>
+
+<!-- MODALE PER MODIFICA PRENOTAZIONE -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>✏️ Modifica</h3>
+            <button class="close-modal" onclick="chiudiModale()">&times;</button>
+        </div>
+        <div class="availability-box" id="editAvailabilityMessage" style="font-size:14px; padding:10px;">
+            Seleziona orari per ricalcolare.
+        </div>
+        <div class="form-group">
+            <label>Giorno:</label>
+            <input type="date" id="editData" required>
+        </div>
+        <div class="orari-group">
+            <div class="form-group">
+                <label>Orario Inizio:</label>
+                <select id="editOraInizio" required>
+                    <option value="08:30">08:30</option>
+                    <option value="09:30">09:30</option>
+                    <option value="10:30">10:30</option>
+                    <option value="11:30">11:30</option>
+                    <option value="14:00">14:00</option>
+                    <option value="15:00">15:00</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Orario Fine:</label>
+                <select id="editOraFine" required></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Numero di PC:</label>
+            <input type="number" id="editNumPc" min="1" max="25" required>
+        </div>
+        <button class="submit-btn" onclick="salvaModifica()">Salva Modifiche</button>
+    </div>
+</div>
+
+<script>
+    const MAX_PC = 25;
+    const SLOT_DISPONIBILI = [
+        { inizio: '08:30', fine: '09:30' }, { inizio: '09:30', fine: '10:30' },
+        { inizio: '10:30', fine: '11:30' }, { inizio: '11:30', fine: '12:30' },
+        { inizio: '14:00', fine: '15:00' }, { inizio: '15:00', fine: '16:00' }
+    ];
+
+    function trovaSlotCoinvolti(oraInizio, oraFine) {
+        let coinvolti = []; let inRegistrazione = false;
+        for (let slot of SLOT_DISPONIBILI) {
+            if (slot.inizio === oraInizio) inRegistrazione = true;
+            if (inRegistrazione) coinvolti.push(`${slot.inizio}-${slot.fine}`);
+            if (slot.fine === oraFine) break;
+        }
+        return coinvolti;
+    }
+
+    // Aggiunte tutte le attività ricorrenti + Colori assegnati automaticamente dalla "classe"
+    const PRENOTAZIONI_FISSE = [
+        { classe: '4', giornoSettimana: 1, oraInizio: '08:30', oraFine: '10:30', numPc: 25, insegnante: 'WRW' },
+        { classe: '5', giornoSettimana: 1, oraInizio: '10:30', oraFine: '12:30', numPc: 18, insegnante: 'Atlas' },
+        { classe: '3', giornoSettimana: 3, oraInizio: '09:30', oraFine: '10:30', numPc: 24, insegnante: 'Atlas' },
+        { classe: '4', giornoSettimana: 4, oraInizio: '09:30', oraFine: '10:30', numPc: 25, insegnante: 'Atlas' },
+        { classe: '1', giornoSettimana: 4, oraInizio: '14:00', oraFine: '16:00', numPc: 22, insegnante: 'Atlas' },
+        { classe: '2', giornoSettimana: 5, oraInizio: '14:00', oraFine: '16:00', numPc: 25, insegnante: 'Atlas' }
+    ].map(f => ({ ...f, slotCoinvolti: trovaSlotCoinvolti(f.oraInizio, f.oraFine) }));
+
+    let prenotazioni = JSON.parse(localStorage.getItem('prenotazioniPc')) || [];
+    let dataCorrenteCal = new Date();
+    let vistaCalendario = 'mensile';
+    let idInModifica = null;
+
+    const form = document.getElementById('bookingForm');
+    const dataInput = document.getElementById('data');
+    const oraInizioInput = document.getElementById('oraInizio');
+    const oraFineInput = document.getElementById('oraFine');
+    const numPcInput = document.getElementById('numPc');
+    const pwdInput = document.getElementById('password');
+    const availabilityMessage = document.getElementById('availabilityMessage');
+    const filterDate = document.getElementById('filterDate');
+    const editData = document.getElementById('editData');
+    const editOraInizio = document.getElementById('editOraInizio');
+    const editOraFine = document.getElementById('editOraFine');
+    const editNumPc = document.getElementById('editNumPc');
+    const editAvMessage = document.getElementById('editAvailabilityMessage');
+
+    // Mostra/Nascondi Password
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') { input.type = 'text'; btn.innerText = '🙈'; } 
+        else { input.type = 'password'; btn.innerText = '👁️'; }
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+        if(tabId === 'elencoTab') renderElenco();
+        if(tabId === 'calendarioTab') renderCalendario();
+    }
+
+    function popolaOpzioniFine(inizioSelezionato, selectFine) {
+        selectFine.innerHTML = '<option value="">Fine...</option>';
+        if (!inizioSelezionato) { selectFine.disabled = true; return; }
+        selectFine.disabled = false;
+        
+        const indiceInizio = SLOT_DISPONIBILI.findIndex(s => s.inizio === inizioSelezionato);
+        let isMattina = indiceInizio <= 3; 
+        for (let i = indiceInizio; i < SLOT_DISPONIBILI.length; i++) {
+            let slotMattina = i <= 3;
+            if (isMattina !== slotMattina) break; 
+            selectFine.innerHTML += `<option value="${SLOT_DISPONIBILI[i].fine}">${SLOT_DISPONIBILI[i].fine}</option>`;
+        }
+    }
+
+    oraInizioInput.addEventListener('change', function() { popolaOpzioniFine(this.value, oraFineInput); aggiornaDisponibilita(); });
+    editOraInizio.addEventListener('change', function() {
+        popolaOpzioniFine(this.value, editOraFine);
+        if(editOraFine.options.length > 1) editOraFine.selectedIndex = 1;
+        calcolaDisponibilitaModifica();
+    });
+
+    function calcolaPcDisponibili(data, oraInizio, oraFine, excludeId = null) {
+        if (!data || !oraInizio || !oraFine) return MAX_PC;
+        const slotCercati = trovaSlotCoinvolti(oraInizio, oraFine);
+        let minimoDisponibile = MAX_PC;
+        let dayOfWeek = new Date(data).getDay();
+        let prenotazioniFisseOggi = PRENOTAZIONI_FISSE.filter(f => f.giornoSettimana === dayOfWeek);
+
+        for (let slot of slotCercati) {
+            let occupatiManual = prenotazioni
+                .filter(p => p.id !== excludeId && p.data === data && p.slotCoinvolti.includes(slot))
+                .reduce((tot, p) => tot + parseInt(p.numPc), 0);
+            let occupatiFisse = prenotazioniFisseOggi
+                .filter(f => f.slotCoinvolti.includes(slot))
+                .reduce((tot, f) => tot + parseInt(f.numPc), 0);
+                
+            let disponibiliQui = MAX_PC - (occupatiManual + occupatiFisse);
+            if (disponibiliQui < minimoDisponibile) minimoDisponibile = disponibiliQui;
+        }
+        return minimoDisponibile;
+    }
+
+    function aggiornaDisponibilita() {
+        if (dataInput.value && oraInizioInput.value && oraFineInput.value) {
+            const disp = calcolaPcDisponibili(dataInput.value, oraInizioInput.value, oraFineInput.value);
+            availabilityMessage.innerHTML = `Disponibili: <strong>${disp} PC</strong> su ${MAX_PC}`;
+            availabilityMessage.style.backgroundColor = disp > 0 ? '#e0f2fe' : '#fee2e2';
+            availabilityMessage.style.color = disp > 0 ? '#0369a1' : '#991b1b';
+            numPcInput.max = disp;
+            if (parseInt(numPcInput.value) > disp) numPcInput.value = disp;
+        }
+    }
+
+    dataInput.addEventListener('change', aggiornaDisponibilita);
+    oraFineInput.addEventListener('change', aggiornaDisponibilita);
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = dataInput.value, oraInizio = oraInizioInput.value, oraFine = oraFineInput.value, numPc = parseInt(numPcInput.value);
+        const pcDisponibili = calcolaPcDisponibili(data, oraInizio, oraFine);
+        if (numPc > pcDisponibili) { alert(`Errore: Solo ${pcDisponibili} PC disponibili!`); return; }
+
+        prenotazioni.push({
+            id: Date.now().toString(), data, classe: document.getElementById('classe').value, 
+            insegnante: document.getElementById('insegnante').value, oraInizio, oraFine,
+            slotCoinvolti: trovaSlotCoinvolti(oraInizio, oraFine), numPc, password: pwdInput.value
+        });
+        localStorage.setItem('prenotazioniPc', JSON.stringify(prenotazioni));
+        
+        alert('Prenotazione confermata!');
+        form.reset(); oraFineInput.disabled = true; aggiornaDisponibilita();
+        document.getElementById('password').type = 'password';
+        document.querySelector('.toggle-pwd-btn').innerText = '👁️';
+        renderElenco(); renderCalendario();
+    });
+
+    window.vaiAPrenotazione = function(id, dataPrenotazione) {
+        switchTab('elencoTab'); filterDate.value = dataPrenotazione; renderElenco();
+        setTimeout(() => {
+            const card = document.getElementById('card-' + id);
+            if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); card.classList.add('highlight'); setTimeout(() => card.classList.remove('highlight'), 2000); }
+        }, 100);
+    }
+
+    window.apriModifica = function(id) {
+        const p = prenotazioni.find(x => x.id === id);
+        if (p.password) {
+            const inseritaPwd = prompt("Inserisci la password per modificare questa prenotazione:");
+            if (inseritaPwd === null) return;
+            if (inseritaPwd !== p.password) { alert("❌ Password errata."); return; }
+        } else { alert("⚠️ Questa è una vecchia prenotazione (senza password). Modifica consentita in via eccezionale."); }
+
+        idInModifica = id;
+        editData.value = p.data; editOraInizio.value = p.oraInizio;
+        popolaOpzioniFine(p.oraInizio, editOraFine); editOraFine.value = p.oraFine; editNumPc.value = p.numPc;
+        document.getElementById('editModal').style.display = 'flex'; calcolaDisponibilitaModifica();
+    }
+
+    function calcolaDisponibilitaModifica() {
+        if (editData.value && editOraInizio.value && editOraFine.value) {
+            const disp = calcolaPcDisponibili(editData.value, editOraInizio.value, editOraFine.value, idInModifica);
+            editAvMessage.innerHTML = `Disponibili: <strong>${disp} PC</strong>`;
+            editAvMessage.style.backgroundColor = disp > 0 ? '#e0f2fe' : '#fee2e2'; editNumPc.max = disp;
+        }
+    }
+    editData.addEventListener('change', calcolaDisponibilitaModifica); editOraFine.addEventListener('change', calcolaDisponibilitaModifica);
+
+    window.salvaModifica = function() {
+        const disp = calcolaPcDisponibili(editData.value, editOraInizio.value, editOraFine.value, idInModifica);
+        const numPc = parseInt(editNumPc.value);
+        if (numPc > disp) { alert(`Errore: Max ${disp} PC disponibili.`); return; }
+
+        let p = prenotazioni.find(x => x.id === idInModifica);
+        p.data = editData.value; p.oraInizio = editOraInizio.value; p.oraFine = editOraFine.value;
+        p.slotCoinvolti = trovaSlotCoinvolti(p.oraInizio, p.oraFine); p.numPc = numPc;
+        localStorage.setItem('prenotazioniPc', JSON.stringify(prenotazioni));
+        alert("✅ Modifica salvata!"); chiudiModale(); renderElenco(); renderCalendario();
+    }
+
+    window.chiudiModale = function() { document.getElementById('editModal').style.display = 'none'; idInModifica = null; }
+
+    window.cancellaPrenotazione = function(id) {
+        const p = prenotazioni.find(x => x.id === id);
+        if (p.password) {
+            const inseritaPwd = prompt("Inserisci la password per ELIMINARE:");
+            if (inseritaPwd === null) return;
+            if (inseritaPwd !== p.password) { alert("❌ Password errata."); return; }
+        } else { alert("⚠️ Vecchia prenotazione (senza password). Eliminazione consentita."); }
+
+        if(confirm('Cancellare definitivamente la prenotazione?')) {
+            prenotazioni = prenotazioni.filter(x => x.id !== id);
+            localStorage.setItem('prenotazioniPc', JSON.stringify(prenotazioni)); renderElenco(); renderCalendario(); aggiornaDisponibilita();
+        }
+    }
+
+    function cambiaVistaCalendario() { vistaCalendario = document.getElementById('calView').value; renderCalendario(); }
+    function vaiAOggi() { dataCorrenteCal = new Date(); renderCalendario(); }
+    function navigaCalendario(dir) { vistaCalendario === 'mensile' ? dataCorrenteCal.setMonth(dataCorrenteCal.getMonth() + dir) : dataCorrenteCal.setDate(dataCorrenteCal.getDate() + (dir * 7)); renderCalendario(); }
+
+    function getTuttePrenotazioniGiorno(dStr) {
+        let dayOfWeek = new Date(dStr).getDay();
+        let manuali = prenotazioni.filter(p => p.data === dStr);
+        let fisse = PRENOTAZIONI_FISSE.filter(f => f.giornoSettimana === dayOfWeek).map(f => ({ ...f, id: 'fissa-'+f.classe+'-'+dStr, data: dStr, isFissa: true }));
+        return [...manuali, ...fisse].sort((a,b) => a.oraInizio.localeCompare(b.oraInizio));
+    }
+
+    function renderCalendario() {
+        const grid = document.getElementById('calendarGrid'), titolo = document.getElementById('calMonthYear');
+        grid.innerHTML = ''; ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].forEach(g => grid.innerHTML += `<div class="day-header">${g}</div>`);
+        let anno = dataCorrenteCal.getFullYear(), mese = dataCorrenteCal.getMonth(), oggi = new Date();
+        
+        if (vistaCalendario === 'mensile') {
+            let nomeMese = dataCorrenteCal.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+            titolo.innerText = nomeMese.charAt(0).toUpperCase() + nomeMese.slice(1);
+            let offset = (new Date(anno, mese, 1).getDay() || 7) - 1;
+            for (let i = 0; i < 42; i++) {
+                let d = new Date(anno, mese, i - offset + 1), dStr = d.toISOString().split('T')[0], isOggi = dStr === oggi.toISOString().split('T')[0];
+                let htmlPills = getTuttePrenotazioniGiorno(dStr).map(p => {
+                    let colorClass = `cl-${p.classe}`;
+                    let baseClass = p.isFissa ? 'book-mini fixed-event' : 'book-mini clickable-event';
+                    let cClick = p.isFissa ? '' : `onclick="vaiAPrenotazione('${p.id}', '${p.data}')"`;
+                    let cIcon = p.isFissa ? '🔒 ' : '';
+                    return `<div class="${baseClass} ${colorClass}" ${cClick} title="${p.oraInizio}-${p.oraFine} Cl.${p.classe}"><strong>${p.oraInizio}</strong> ${cIcon}Cl.${p.classe}</div>`;
+                }).join('');
+                grid.innerHTML += `<div class="cal-cell ${d.getMonth() !== mese ? 'other-month' : ''} ${isOggi ? 'today' : ''}"><div class="cal-date">${d.getDate()}</div>${htmlPills}</div>`;
+            }
+        } else {
+            let offset = (dataCorrenteCal.getDay() || 7) - 1, lunedi = new Date(anno, mese, dataCorrenteCal.getDate() - offset);
+            titolo.innerText = `${lunedi.toLocaleDateString('it-IT', { day:'numeric', month:'short' })} - ${new Date(lunedi.getFullYear(), lunedi.getMonth(), lunedi.getDate()+6).toLocaleDateString('it-IT', { day:'numeric', month:'short', year:'numeric'})}`;
+            for (let i = 0; i < 7; i++) {
+                let d = new Date(lunedi.getFullYear(), lunedi.getMonth(), lunedi.getDate() + i), dStr = d.toISOString().split('T')[0], isOggi = dStr === oggi.toISOString().split('T')[0];
+                let htmlPills = getTuttePrenotazioniGiorno(dStr).map(p => {
+                    let colorClass = `cl-${p.classe}`;
+                    let baseClass = p.isFissa ? 'book-full fixed-event' : 'book-full clickable-event';
+                    let cClick = p.isFissa ? '' : `onclick="vaiAPrenotazione('${p.id}', '${p.data}')"`;
+                    let cTitle = p.isFissa ? `🔒 Fissa: ${p.insegnante}` : '🏫 Classe ' + p.classe + 'ª';
+                    return `<div class="${baseClass} ${colorClass}" ${cClick}><strong>${p.oraInizio}-${p.oraFine}</strong><br>${cTitle}<br>💻 ${p.numPc} PC</div>`;
+                }).join('');
+                grid.innerHTML += `<div class="cal-cell ${isOggi ? 'today' : ''}"><div class="cal-date">${d.getDate()}</div>${htmlPills}</div>`;
+            }
+        }
+    }
+
+    function renderElenco() {
+        const container = document.getElementById('bookingsList'); container.innerHTML = '';
+        let filtrate = [];
+        if(filterDate.value) {
+            filtrate = getTuttePrenotazioniGiorno(filterDate.value);
+        } else {
+            filtrate = [...prenotazioni];
+            let fineRange = new Date(); fineRange.setDate(fineRange.getDate() + 60);
+            for (let d = new Date(); d <= fineRange; d.setDate(d.getDate() + 1)) {
+                let dStr = d.toISOString().split('T')[0]; let dayOfWeek = d.getDay();
+                PRENOTAZIONI_FISSE.filter(f => f.giornoSettimana === dayOfWeek).forEach(f => {
+                    filtrate.push({...f, id: 'fissa-'+f.classe+'-'+dStr, data: dStr, isFissa: true});
+                });
+            }
+            filtrate.sort((a,b) => a.data === b.data ? a.oraInizio.localeCompare(b.oraInizio) : a.data.localeCompare(b.data));
+        }
+
+        if(filtrate.length === 0) { container.innerHTML = '<p style="text-align:center; color:#6b7280;">Nessuna prenotazione trovata.</p>'; return; }
+
+        filtrate.forEach(p => {
+            const dataFormattata = new Date(p.data).toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+            // Applica il colore del bordo in base alla classe
+            let colorVar = `var(--c${p.classe})`;
+            
+            if (p.isFissa) {
+                container.innerHTML += `<div class="booking-card fixed-card" style="border-left-color: ${colorVar};"><div><strong>📅 ${dataFormattata} | ⏰ ${p.oraInizio} - ${p.oraFine}</strong><br>🔒 Attività ricorrente: <strong>${p.insegnante}</strong> | 🏫 Classe ${p.classe}ª<br>💻 PC Prenotati: <strong>${p.numPc}</strong></div><div><em style="color:#64748b; font-size:14px;">Non modif.</em></div></div>`;
+            } else {
+                container.innerHTML += `<div class="booking-card" id="card-${p.id}" style="border-left-color: ${colorVar}; border-left-width: 5px;"><div><strong>📅 ${dataFormattata} | ⏰ ${p.oraInizio} - ${p.oraFine}</strong><br>👤 Ins. ${p.insegnante} | 🏫 Classe ${p.classe}ª<br>💻 PC Prenotati: <strong>${p.numPc}</strong></div><div class="btn-group"><button class="edit-btn" onclick="apriModifica('${p.id}')">Modifica</button><button class="delete-btn" onclick="cancellaPrenotazione('${p.id}')">Elimina</button></div></div>`;
+            }
+        });
+    }
+
+    filterDate.addEventListener('change', renderElenco);
+    renderCalendario();
+</script>
+</body>
+</html>
