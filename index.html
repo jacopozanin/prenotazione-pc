@@ -106,7 +106,7 @@
         .calendar-controls button { padding: 10px; background: #e5e7eb; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; }
         
         /* Modificata griglia a 5 colonne per escludere il weekend */
-        .calendar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
         
         .day-header { background: var(--primary); color: white; text-align: center; padding: 8px 0; font-weight: bold; border-radius: 4px; font-size: 14px; }
         .cal-cell { border: 1px solid #d1d5db; background: #fff; min-height: 100px; padding: 4px; display: flex; flex-direction: column; gap: 3px; border-radius: 4px; }
