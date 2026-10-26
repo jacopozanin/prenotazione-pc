@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Prenotazione Computer Scuola</title>
+    
+    <!-- Icone per App Mobile e Schermata Home -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-title" content="PC Scuola">
+    <meta name="application-name" content="PC Scuola">
+    <meta name="theme-color" content="#4F46E5">
+
     <style>
         :root {
             --primary: #4F46E5;
@@ -83,7 +91,7 @@
             border: 1px solid #d1d5db; border-radius: 6px; padding: 15px;
             margin-bottom: 10px; background-color: #f9fafb; display: flex;
             justify-content: space-between; align-items: center; transition: all 0.3s;
-            border-left: 5px solid #d1d5db; /* Bordo base */
+            border-left: 5px solid #d1d5db;
         }
         .booking-card.highlight { transform: scale(1.02); box-shadow: 0 0 10px rgba(79, 70, 229, 0.3); }
         .booking-card.fixed-card { background-color: #f1f5f9; }
@@ -92,11 +100,14 @@
         .edit-btn { background-color: #f59e0b; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight:bold; }
         .delete-btn { background-color: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight:bold; }
 
-        /* Calendario */
+        /* Calendario 5 Giorni (Lun-Ven) */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f9fafb; padding: 10px; border-radius: 8px; flex-wrap: wrap; gap:10px; }
         .calendar-controls { display: flex; gap: 5px; width: 100%; justify-content: space-between; }
         .calendar-controls button { padding: 10px; background: #e5e7eb; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        
+        /* Modificata griglia a 5 colonne per escludere il weekend */
+        .calendar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+        
         .day-header { background: var(--primary); color: white; text-align: center; padding: 8px 0; font-weight: bold; border-radius: 4px; font-size: 14px; }
         .cal-cell { border: 1px solid #d1d5db; background: #fff; min-height: 100px; padding: 4px; display: flex; flex-direction: column; gap: 3px; border-radius: 4px; }
         .cal-cell.other-month { background: #f3f4f6; opacity: 0.6; }
@@ -110,7 +121,7 @@
         .book-mini { font-size: 11px; padding: 4px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;}
         .book-full { font-size: 12px; padding: 6px; border-radius: 4px; margin-bottom: 2px; line-height: 1.3; }
 
-        /* --- CLASSI COLORI (Lilla, Verde, Giallo, Blu, Rosso) --- */
+        /* Colori Classi */
         .cl-1 { background-color: #f3e8ff !important; color: #581c87 !important; border-left-color: var(--c1) !important; }
         .cl-2 { background-color: #dcfce7 !important; color: #14532d !important; border-left-color: var(--c2) !important; }
         .cl-3 { background-color: #fef9c3 !important; color: #713f12 !important; border-left-color: var(--c3) !important; }
@@ -129,7 +140,6 @@
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .modal-header h3 { margin: 0; color: var(--primary); font-size: 20px;}
         .close-modal { background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280; padding: 0; line-height: 1;}
-
         .istruzioni-lista li { margin-bottom: 10px; line-height: 1.4; }
 
         @media (max-width: 600px) {
@@ -326,6 +336,11 @@
         { inizio: '14:00', fine: '15:00' }, { inizio: '15:00', fine: '16:00' }
     ];
 
+    // Formattatore di date robuste per evitare scostamenti di fuso orario
+    function formatDateLocal(d) {
+        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
     function trovaSlotCoinvolti(oraInizio, oraFine) {
         let coinvolti = []; let inRegistrazione = false;
         for (let slot of SLOT_DISPONIBILI) {
@@ -336,7 +351,7 @@
         return coinvolti;
     }
 
-    // Aggiunte tutte le attività ricorrenti + Colori assegnati automaticamente dalla "classe"
+    // Le prenotazioni fisse (Corrette coi giorni 1=Lun ... 5=Ven)
     const PRENOTAZIONI_FISSE = [
         { classe: '4', giornoSettimana: 1, oraInizio: '08:30', oraFine: '10:30', numPc: 25, insegnante: 'WRW' },
         { classe: '5', giornoSettimana: 1, oraInizio: '10:30', oraFine: '12:30', numPc: 18, insegnante: 'Atlas' },
@@ -529,15 +544,22 @@
 
     function renderCalendario() {
         const grid = document.getElementById('calendarGrid'), titolo = document.getElementById('calMonthYear');
-        grid.innerHTML = ''; ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].forEach(g => grid.innerHTML += `<div class="day-header">${g}</div>`);
+        grid.innerHTML = ''; ['Lun', 'Mar', 'Mer', 'Gio', 'Ven'].forEach(g => grid.innerHTML += `<div class="day-header">${g}</div>`);
         let anno = dataCorrenteCal.getFullYear(), mese = dataCorrenteCal.getMonth(), oggi = new Date();
+        let oggiStr = formatDateLocal(oggi);
         
         if (vistaCalendario === 'mensile') {
             let nomeMese = dataCorrenteCal.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
             titolo.innerText = nomeMese.charAt(0).toUpperCase() + nomeMese.slice(1);
             let offset = (new Date(anno, mese, 1).getDay() || 7) - 1;
+            
             for (let i = 0; i < 42; i++) {
-                let d = new Date(anno, mese, i - offset + 1), dStr = d.toISOString().split('T')[0], isOggi = dStr === oggi.toISOString().split('T')[0];
+                let d = new Date(anno, mese, i - offset + 1);
+                // Escludi Sabato (6) e Domenica (0)
+                if (d.getDay() === 0 || d.getDay() === 6) continue;
+
+                let dStr = formatDateLocal(d);
+                let isOggi = dStr === oggiStr;
                 let htmlPills = getTuttePrenotazioniGiorno(dStr).map(p => {
                     let colorClass = `cl-${p.classe}`;
                     let baseClass = p.isFissa ? 'book-mini fixed-event' : 'book-mini clickable-event';
@@ -548,10 +570,16 @@
                 grid.innerHTML += `<div class="cal-cell ${d.getMonth() !== mese ? 'other-month' : ''} ${isOggi ? 'today' : ''}"><div class="cal-date">${d.getDate()}</div>${htmlPills}</div>`;
             }
         } else {
-            let offset = (dataCorrenteCal.getDay() || 7) - 1, lunedi = new Date(anno, mese, dataCorrenteCal.getDate() - offset);
-            titolo.innerText = `${lunedi.toLocaleDateString('it-IT', { day:'numeric', month:'short' })} - ${new Date(lunedi.getFullYear(), lunedi.getMonth(), lunedi.getDate()+6).toLocaleDateString('it-IT', { day:'numeric', month:'short', year:'numeric'})}`;
-            for (let i = 0; i < 7; i++) {
-                let d = new Date(lunedi.getFullYear(), lunedi.getMonth(), lunedi.getDate() + i), dStr = d.toISOString().split('T')[0], isOggi = dStr === oggi.toISOString().split('T')[0];
+            // Settimanale a 5 Giorni
+            let offset = (dataCorrenteCal.getDay() || 7) - 1; 
+            let lunedi = new Date(anno, mese, dataCorrenteCal.getDate() - offset);
+            let venerdi = new Date(lunedi.getFullYear(), lunedi.getMonth(), lunedi.getDate() + 4);
+            titolo.innerText = `${lunedi.toLocaleDateString('it-IT', { day:'numeric', month:'short' })} - ${venerdi.toLocaleDateString('it-IT', { day:'numeric', month:'short', year:'numeric'})}`;
+            
+            for (let i = 0; i < 5; i++) {
+                let d = new Date(lunedi.getFullYear(), lunedi.getMonth(), lunedi.getDate() + i);
+                let dStr = formatDateLocal(d);
+                let isOggi = dStr === oggiStr;
                 let htmlPills = getTuttePrenotazioniGiorno(dStr).map(p => {
                     let colorClass = `cl-${p.classe}`;
                     let baseClass = p.isFissa ? 'book-full fixed-event' : 'book-full clickable-event';
@@ -573,7 +601,7 @@
             filtrate = [...prenotazioni];
             let fineRange = new Date(); fineRange.setDate(fineRange.getDate() + 60);
             for (let d = new Date(); d <= fineRange; d.setDate(d.getDate() + 1)) {
-                let dStr = d.toISOString().split('T')[0]; let dayOfWeek = d.getDay();
+                let dStr = formatDateLocal(d); let dayOfWeek = d.getDay();
                 PRENOTAZIONI_FISSE.filter(f => f.giornoSettimana === dayOfWeek).forEach(f => {
                     filtrate.push({...f, id: 'fissa-'+f.classe+'-'+dStr, data: dStr, isFissa: true});
                 });
@@ -584,10 +612,11 @@
         if(filtrate.length === 0) { container.innerHTML = '<p style="text-align:center; color:#6b7280;">Nessuna prenotazione trovata.</p>'; return; }
 
         filtrate.forEach(p => {
-            const dataFormattata = new Date(p.data).toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
-            // Applica il colore del bordo in base alla classe
-            let colorVar = `var(--c${p.classe})`;
+            const dateObj = new Date(p.data); 
+            // Correzione per mostrare correttamente la data formattata partendo dalla stringa (fuso orario)
+            const dataFormattata = new Date(dateObj.getTime() + dateObj.getTimezoneOffset() * 60000).toLocaleDateString('it-IT', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
             
+            let colorVar = `var(--c${p.classe})`;
             if (p.isFissa) {
                 container.innerHTML += `<div class="booking-card fixed-card" style="border-left-color: ${colorVar};"><div><strong>📅 ${dataFormattata} | ⏰ ${p.oraInizio} - ${p.oraFine}</strong><br>🔒 Attività ricorrente: <strong>${p.insegnante}</strong> | 🏫 Classe ${p.classe}ª<br>💻 PC Prenotati: <strong>${p.numPc}</strong></div><div><em style="color:#64748b; font-size:14px;">Non modif.</em></div></div>`;
             } else {
